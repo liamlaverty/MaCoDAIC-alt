@@ -29,6 +29,7 @@ def override_print_with_logger(logger: logging.Logger):
         logger.info(message)
     builtins.print = new_print
 
+
 def create_custom_logger(log_path: Path, logger_name) -> logging.Logger:
     """
     Create a logger for the that logs to the notebook console, 
