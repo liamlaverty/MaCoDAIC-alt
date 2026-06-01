@@ -1,3 +1,5 @@
+*.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -220,6 +222,7 @@ __marimo__/
 
 
 _logs/**/*.log
+_logs/**/*.csv
 
 output/results/**/*.json
 **/*results.json
