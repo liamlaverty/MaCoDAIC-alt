@@ -56,7 +56,7 @@ def create_custom_logger(log_path: Path, logger_name) -> logging.Logger:
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     log_path.mkdir(parents=True, exist_ok=True)
-    file_handler = logging.FileHandler(log_path / 'economy_log.txt.log')
+    file_handler = logging.FileHandler(log_path / '__economy_log.txt.log')
     file_handler.setLevel(logging.INFO) # File gets INFO and above
     file_handler.setFormatter(formatter)
 
