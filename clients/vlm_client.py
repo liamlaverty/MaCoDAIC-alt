@@ -168,7 +168,7 @@ class VLMClient:
         unsupported_models = {"claude-opus-4-7"}
         return self.model not in unsupported_models
 
-    def _build_text_payload(self, prompt: str, max_tokens: int, *, system_prompt: str) -> dict:
+    def _build_text_payload(self, prompt: str, max_tokens: int, *, system_prompt: str, language_model_path: str) -> dict:
         """
         Build request payload for text-only query based on provider.
 
@@ -186,7 +186,7 @@ class VLMClient:
 
         payload: dict = {}
 
-        payload["model"] = self.model
+        payload["model"] = language_model_path or self.model
 
         if self.provider == "anthropic":
             payload["system"] = [
@@ -224,7 +224,7 @@ class VLMClient:
         else:
             return cast(str, response_data["choices"][0]["message"]["content"])
 
-    def query(self, prompt: str, max_tokens: int = MAX_TOKENS, *, system_prompt: str) -> str:
+    def query(self, prompt: str, max_tokens: int = MAX_TOKENS, *, system_prompt: str, language_model_path: str, temperature: float = None) -> str:
         """
         Send a prompt to the VLM API and return the response.
 
@@ -236,6 +236,8 @@ class VLMClient:
                 top-level ``system`` field as a content block with
                 ``cache_control``. OpenAI-compatible providers: prepended as
                 the first ``role: system`` message.
+            language_model_path (str): The language model being used by the query
+            temperature (float): Optional temperature override for this query (defaults to client temperature)
 
         Returns:
             str: The LLM's response text
@@ -244,7 +246,14 @@ class VLMClient:
             ConnectionError: If the VLM API is not reachable or auth fails
             requests.RequestException: For other HTTP errors
         """
-        payload = self._build_text_payload(prompt, max_tokens, system_prompt=system_prompt)
+
+        load_model = self.load_model(language_model_path)
+
+        payload = self._build_text_payload(prompt, max_tokens, system_prompt=system_prompt, 
+                                           language_model_path=language_model_path)
+
+        if temperature is not None:
+            payload["temperature"] = temperature
 
         try:
             # Retry loop for rate limiting
@@ -307,7 +316,7 @@ class VLMClient:
             if self.provider == "anthropic":
                 # Anthropic doesn't document GET /v1/models, so perform a minimal message call
                 logger.debug("Checking Anthropic API availability with minimal message call")
-                payload = self._build_text_payload("test", 1, system_prompt="")
+                payload = self._build_text_payload("test", 1, system_prompt="", language_model_path=self.model)
                 response = requests.post(
                     self.chat_endpoint,
                     json=payload,
@@ -325,6 +334,7 @@ class VLMClient:
                 return response.status_code == 200
         except requests.RequestException:
             return False
+        
 
     def _build_multimodal_payload(
         self, prompt: str, image_bytes: bytes, max_tokens: int, *, system_prompt: str
@@ -481,7 +491,6 @@ class VLMClient:
                 # and if so, add that to the list of loaded models to return
                 if model.get("key") in [instance.get("id") for instance in model.get("loaded_instances", [])]:
                     model_list.append(model.get("key"))
-            print(f"Loaded models: {model_list}")
             return model_list
         except requests.RequestException as e:
             print(f"Failed to list models: {e}")
