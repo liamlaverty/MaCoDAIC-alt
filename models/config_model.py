@@ -12,9 +12,13 @@ class WholesalerConfig:
 
 
 class RetailerConfig:
-    num_retailers: int = 10
-    starting_money: Decimal = Decimal('200.0')
-    competition_model: CompetitionModel
+    def __init__(self,
+                 num_retailers: int = 5,
+                 starting_money: Decimal = Decimal('200.0'),
+                 competition_model: CompetitionModel = CompetitionModel.BERTRAND):
+        self.num_retailers = num_retailers
+        self.starting_money = starting_money
+        self.competition_model = competition_model
     
 
 class ConsumerConfig:

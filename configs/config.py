@@ -80,6 +80,6 @@ else:  # lmstudio
     PLANNER_MODEL = LMSTUDIO_PLANNER_MODEL
 
 # Request settings
-REQUEST_TIMEOUT = 120  # seconds
+REQUEST_TIMEOUT = 300  # seconds
 MAX_TOKENS = 8192
-VLM_TIMEOUT = 180  # seconds (VLMs are slower than text-only LLMs)
+VLM_TIMEOUT = 300  # seconds (VLMs are slower than text-only LLMs)
