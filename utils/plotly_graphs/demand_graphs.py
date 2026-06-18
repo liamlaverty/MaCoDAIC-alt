@@ -54,6 +54,80 @@ def plot_demand_bar(
     return fig
 
 
+def plot_jobs_history(
+    jobs_per_resident_history: list[float] | None = None,
+    unemployment_rate_history: list[float] | None = None,
+    vacancy_rate_history: list[float] | None = None,
+    title: str = "Jobs and Employment Over Time",
+) -> go.Figure:
+    from plotly.subplots import make_subplots
+
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+    if jobs_per_resident_history is not None:
+        iterations = list(range(len(jobs_per_resident_history)))
+        fig.add_trace(go.Scatter(
+            x=iterations,
+            y=jobs_per_resident_history,
+            mode="lines",
+            name="Jobs per Resident",
+            line=dict(color=COMMERCIAL_COLOR, width=2.5),
+            hovertemplate="Iteration %{x}<br>Jobs per Resident: %{y:.2f}<extra></extra>",
+        ), secondary_y=False)
+
+        fig.add_hline(
+            y=1,
+            line=dict(color=TARGET_LINE_COLOR, width=1.5, dash="dot"),
+            annotation_text="1 job per resident",
+            annotation_position="bottom right",
+            secondary_y=False,
+        )
+
+    if unemployment_rate_history is not None:
+        iterations = list(range(len(unemployment_rate_history)))
+        fig.add_trace(go.Scatter(
+            x=iterations,
+            y=unemployment_rate_history,
+            mode="lines",
+            name="Unemployment Rate",
+            line=dict(color="rgb(214, 90, 48)", width=2.5),
+            hovertemplate="Iteration %{x}<br>Unemployment: %{y:.2%}<extra></extra>",
+        ), secondary_y=True)
+
+    if vacancy_rate_history is not None:
+        iterations = list(range(len(vacancy_rate_history)))
+        fig.add_trace(go.Scatter(
+            x=iterations,
+            y=vacancy_rate_history,
+            mode="lines",
+            name="Vacancy Rate",
+            line=dict(color=RESIDENTIAL_COLOR, width=2.5, dash="dash"),
+            hovertemplate="Iteration %{x}<br>Vacancy: %{y:.2%}<extra></extra>",
+        ), secondary_y=True)
+
+    fig.update_layout(
+        title=title,
+        template="plotly_white",
+        xaxis=dict(title="Iteration"),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        hovermode="x unified",
+        margin=dict(t=80, r=70),
+    )
+    fig.update_yaxes(
+        title_text="Jobs per Resident",
+        rangemode="tozero",
+        secondary_y=False,
+    )
+    fig.update_yaxes(
+        title_text="Rate",
+        tickformat=".0%",
+        range=[0, 1],
+        secondary_y=True,
+    )
+
+    return fig
+
+
 def plot_demand_history(
     residential_demand_history: list[float] | None = None,
     commercial_demand_history: list[float] | None = None,
