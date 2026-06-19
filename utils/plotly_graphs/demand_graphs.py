@@ -199,10 +199,23 @@ def plot_demand_history(
             line=dict(color="black", dash="dot"),
         ))
 
+    all_values = [
+        v
+        for hist in (
+            residential_demand_history, commercial_demand_history, industrial_demand_history,
+            residential_target_history, commercial_target_history, industrial_target_history,
+            population_history,
+        )
+        if hist is not None
+        for v in hist
+    ]
+    y_min = min(all_values) if all_values else 0
+    y_max = max(all_values) if all_values else 1
+
     fig.update_layout(
         title=title,
         xaxis=dict(title="Iteration"),
-        yaxis=dict(range=[0, max(max(residential_demand_history or [0]), max(commercial_demand_history or [0]), max(industrial_demand_history or [0]), max(residential_target_history or [0]), max(commercial_target_history or [0]), max(industrial_target_history or [0]), max(population_history or [0]))    ], title="Demand"),
+        yaxis=dict(range=[y_min, y_max], title="Demand"),
     )
 
     return fig
