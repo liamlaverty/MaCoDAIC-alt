@@ -62,7 +62,7 @@ class Bank:
         return account
  
     def get_account_by_owner(self, owner: uuid.UUID) -> BankAccount:
-        account = self.accounts_by_owner.get(owner)
+        account = self.accounts_by_owner.get(owner.id_uuid)
         if account is None:
             raise ValueError(f'No account found for owner {owner}')
         return account

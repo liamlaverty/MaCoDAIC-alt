@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from src.econsim.entities.actor_entity import ActorEntity, RciType
 
 
@@ -14,3 +16,4 @@ class IndustrialEntity(ActorEntity):
         self.stock_capacity = 1000
         self.stock_price_per_unit = 0.5
         self.stock_regeneration_rate = 0.1 # 10% of stock capacity per day
+        self.tax_owed = Decimal('0')
