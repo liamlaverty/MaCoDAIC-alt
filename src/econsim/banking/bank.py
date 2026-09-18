@@ -46,6 +46,12 @@ class Bank:
     def create_account(self, owner, initial_balance: Decimal = Decimal(0)) -> BankAccount:
         """
         Create an account for owner, and attach it to the owner as owner.account.
+
+        Args:
+            - owner: The entity that will own the account. Must have an id_uuid attribute.
+            - initial_balance: The starting balance for the account (default is Decimal(0)).
+        Returns:
+            - BankAccount: The newly created bank account for the owner.
         """
         if owner.id_uuid in self.accounts_by_owner:
             raise ValueError(f'Account already exists for owner {owner.name} (UUID: {owner.id_uuid})')
@@ -60,11 +66,19 @@ class Bank:
         if account is None:
             raise ValueError(f'No account found for owner {owner}')
         return account
- 
-    def get_balance(self, owner: uuid.UUID) -> Decimal:
-        """Compatibility wrapper. In hot loops, read entity.account.balance."""
-        return self.get_account_by_owner(owner).balance
- 
+
+    def total_money(self) -> Decimal:
+        """
+        Return the total money held across all accounts in the bank.
+
+        Args:
+            - None
+        Returns:
+            - Decimal: The total money held across all accounts in the bank.
+        """
+        return sum((a.balance for a in self.accounts_by_owner.values()), Decimal(0))
+
+
     def sum_all_accounts(self, entity_type: str | None = None) -> Decimal:
         if entity_type is None:
             return sum(self.totals_by_type.values(), Decimal(0))
@@ -123,11 +137,16 @@ class Bank:
         """
         Return the flow matrix for the period, and start a new one.
         Call this at the end of each month (or day) and store the result in history.
+
+        Args:
+            - None
+        Returns:
+            - dict[tuple[str, str, str], list]: The flow matrix for the period.
         """
         flows, self.flows = self.flows, {}
         return flows
  
-    def check_totals(self) -> None:
+    def debug_check_totals(self) -> None:
         """
         Debug check: recalculate the totals from all accounts and compare them
         with the running totals. Do not call this in the hot path.
