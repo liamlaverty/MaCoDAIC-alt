@@ -1,5 +1,7 @@
 from collections import defaultdict
 from decimal import Decimal
+import plotly.graph_objects as go
+
 
 
 def plot_flows_sankey(flows, title="Money flows"):

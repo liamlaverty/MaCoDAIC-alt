@@ -1,4 +1,3 @@
-
 """
 Bank and account structures for the RCI economy simulation (for use in `economy-rci-jun.ipynb`)
  
@@ -19,15 +18,16 @@ from collections import defaultdict
 from decimal import Decimal
  
 from exceptions.not_enough_money_error import NotEnoughMoneyError
- 
+from exceptions.account_closed_error import AccountClosedError
  
 class BankAccount:
-    __slots__ = ('balance', 'owner_id', 'owner_type')
+    __slots__ = ('balance', 'owner_id', 'owner_type', 'closed')
  
     def __init__(self, owner_id: uuid.UUID, owner_type: str, initial_balance: Decimal = Decimal(0)):
         self.balance = initial_balance
         self.owner_id = owner_id
         self.owner_type = owner_type
+        self.closed = False
  
  
 class Bank:
@@ -94,7 +94,10 @@ class Bank:
         Raises:
             - ValueError: If amount is negative.
             - NotEnoughMoneyError: If the sender does not have enough money.
+            - AccountClosedError: If the sender or receiver account is closed (specified in the error message).
         """
+        if sender.closed or receiver.closed:
+            raise AccountClosedError(f'Transfer involves a closed account. Sender is closed: {sender.closed}, Receiver is closed: {receiver.closed}.')
         if amount < 0:
             raise ValueError(f'Transfer amount must not be negative: {amount}')
         if sender.balance < amount:
@@ -145,7 +148,27 @@ class Bank:
         """
         flows, self.flows = self.flows, {}
         return flows
- 
+
+    def close_account(self, owner, purpose: str) -> Decimal:
+        """
+        Close a given account.
+
+        Args:
+            - owner: The owner of the account to be closed.
+            - purpose: The reason for closing the account.
+
+        Returns:
+            - Decimal: The final balance of the closed account.
+        Raises:
+            - AssertionError: If the account has a non-zero balance when attempting to close it.
+        """
+        account = self.get_account_by_owner(owner)
+        balance = account.balance
+        assert balance == 0, "Cannot close account with non-zero balance."
+        del self.accounts_by_owner[owner.id_uuid]
+        account.closed = True
+        return balance
+
     def debug_check_totals(self) -> None:
         """
         Debug check: recalculate the totals from all accounts and compare them
