@@ -3,6 +3,8 @@ import logging
 from pathlib import Path
 import sys
 
+
+
 def override_print_with_logger(logger: logging.Logger):
     """
     Override the builtin print function to log messages
@@ -61,10 +63,23 @@ def create_custom_logger(log_path: Path, logger_name) -> logging.Logger:
     file_handler.setFormatter(formatter)
 
     stream_handler = logging.StreamHandler(sys.stdout)
-    stream_handler.setLevel(logging.DEBUG) # Notebook gets DEBUG and above
+    stream_handler.setLevel(PROGRESS) # Notebook gets PROGRESS and above
     stream_handler.setFormatter(formatter)
 
     custom_logger.addHandler(file_handler)
     custom_logger.addHandler(stream_handler)
 
     return custom_logger
+
+
+
+PROGRESS = 25
+
+logging.addLevelName(PROGRESS, "PROGRESS")
+
+
+def _progress(self, message, *args, **kwargs):
+    if self.isEnabledFor(PROGRESS):
+        self._log(PROGRESS, message, args, **kwargs)
+
+logging.Logger.progress = _progress
